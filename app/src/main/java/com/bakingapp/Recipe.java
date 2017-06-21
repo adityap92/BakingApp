@@ -24,6 +24,14 @@ public class Recipe {
         this.steps = new ArrayList<Step>();
     }
 
+    public String getServings() {
+        return String.valueOf(servings);
+    }
+
+    public String getName(){
+        return name;
+    }
+
     /**
      * add ingredients to Recipe
      * @param quant
