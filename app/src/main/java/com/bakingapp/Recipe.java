@@ -20,6 +20,8 @@ public class Recipe {
         this.id = id;
         this.name = name;
         this.servings = servings;
+        this.ingredients = new ArrayList<Ingredient>();
+        this.steps = new ArrayList<Step>();
     }
 
     /**
