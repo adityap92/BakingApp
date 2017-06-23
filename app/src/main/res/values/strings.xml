@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">BakingApp</string>
     <string name="recipe_url">https://go.udacity.com/android-baking-app-json</string>
+    <string name="serves">Serves:</string>
 </resources>

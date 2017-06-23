@@ -1,5 +1,6 @@
 package com.bakingapp;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -8,7 +9,7 @@ import java.util.ArrayList;
  * Created by aditya on 6/20/17.
  */
 
-public class Recipe {
+public class Recipe implements Serializable{
 
     private int id;
     private String name;
@@ -25,7 +26,7 @@ public class Recipe {
     }
 
     public String getServings() {
-        return String.valueOf(servings);
+        return " " + String.valueOf(servings);
     }
 
     public String getName(){
@@ -55,7 +56,7 @@ public class Recipe {
     }
 
 
-    private class Ingredient{
+    private class Ingredient implements Serializable{
 
         private int quantity;
         private String measure;
@@ -69,7 +70,7 @@ public class Recipe {
 
     }
 
-    private class Step{
+    private class Step implements Serializable{
         private int stepId;
         private String shortDesc;
         private String desc;

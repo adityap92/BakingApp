@@ -1,6 +1,7 @@
 package com.bakingapp;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -107,10 +108,13 @@ public class MainActivity extends AppCompatActivity {
 
         public class ViewHolder extends RecyclerView.ViewHolder {
 
+            View view;
+
             @BindView(R.id.tvRecipeMain) TextView tvRecipeName;
             @BindView(R.id.tvRecipeServing) TextView tvRecipeServing;
             public ViewHolder (View v){
                 super(v);
+                view = v;
                 ButterKnife.bind(this,v);
             }
         }
@@ -130,7 +134,22 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
             holder.tvRecipeName.setText(recip.get(position).getName());
-            holder.tvRecipeServing.setText(recip.get(position).getServings());
+            holder.tvRecipeServing.setText(getString(R.string.serves) + recip.get(position).getServings());
+
+            final Recipe r = recipes.get(position);
+
+            holder.view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    //open recipe steps screen here and pass recipe object to RecipeStepsActivity
+                    Intent stepsIntent = new Intent(mainContext, RecipeStepsActivity.class);
+                    Bundle b = new Bundle();
+                    b.putSerializable("steps", r);
+                    stepsIntent.putExtras(b);
+                    startActivity(stepsIntent);
+                }
+            });
+
         }
 
         @Override
