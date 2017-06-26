@@ -17,6 +17,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".RecipeStepsActivity"/>
+        <activity android:name=".StepsDetailActivity"/>
     </application>
 
     <uses-permission android:name="android.permission.INTERNET"/>

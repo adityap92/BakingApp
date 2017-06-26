@@ -4,4 +4,29 @@
     android:layout_height="match_parent"
     android:background="@android:color/white">
 
+    <ExpandableListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/lvIngredients"
+        android:layout_marginLeft="@dimen/card_margin"
+        android:groupIndicator="@null"/>
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/black"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/steps"
+        android:layout_marginLeft="@dimen/card_margin"
+        android:textColor="@android:color/black"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/rvRecipeSteps"
+        android:scrollbars="vertical"
+        android:layout_gravity="center_vertical"/>
+
 </LinearLayout>

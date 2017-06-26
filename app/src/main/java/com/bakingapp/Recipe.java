@@ -43,6 +43,10 @@ public class Recipe implements Serializable{
         this.ingredients.add(new Ingredient(quant,meas,iName));
     }
 
+    public ArrayList<Ingredient> getIngredients(){
+        return this.ingredients;
+    }
+
     /**
      * add steps to Recipe
      * @param id
@@ -55,8 +59,12 @@ public class Recipe implements Serializable{
         this.steps.add(new Step(id, sDesc, d, vUrl, thumb));
     }
 
+    public ArrayList<Step> getSteps(){
+        return this.steps;
+    }
 
-    private class Ingredient implements Serializable{
+
+    public static class Ingredient implements Serializable{
 
         private int quantity;
         private String measure;
@@ -68,9 +76,21 @@ public class Recipe implements Serializable{
             this.ingredientName = ingredientName;
         }
 
+        public String getIngredientName(){
+            return this.ingredientName;
+        }
+
+        public int getQuantity() {
+            return quantity;
+        }
+
+        public String getMeasure() {
+            return measure;
+        }
+
     }
 
-    private class Step implements Serializable{
+    public static class Step implements Serializable{
         private int stepId;
         private String shortDesc;
         private String desc;
@@ -83,6 +103,18 @@ public class Recipe implements Serializable{
             this.desc = desc;
             this.videoUrl = videoUrl;
             this.thumbnail = thumbnail;
+        }
+
+        public String getShortDesc() {
+            return shortDesc;
+        }
+
+        public String getDesc() {
+            return desc;
+        }
+
+        public String getVideoUrl() {
+            return videoUrl;
         }
     }
 }

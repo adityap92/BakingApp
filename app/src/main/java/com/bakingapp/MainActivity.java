@@ -28,7 +28,8 @@ public class MainActivity extends AppCompatActivity {
 
     public ArrayList<Recipe> recipes;
     private Context mainContext;
-    @BindView(R.id.rvRecipeMain) RecyclerView recipeView;
+    @BindView(R.id.rvRecipeMain)
+    RecyclerView recipeView;
     private RecyclerView.Adapter recipeAdapter;
     private RecyclerView.LayoutManager recipeLayoutManager;
 
