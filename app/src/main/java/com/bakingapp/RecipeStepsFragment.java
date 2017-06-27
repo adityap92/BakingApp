@@ -1,8 +1,10 @@
 package com.bakingapp;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -17,44 +19,50 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * Created by aditya on 6/21/17.
+ * Created by aditya on 6/26/17.
  */
 
-public class RecipeStepsActivity extends AppCompatActivity {
+public class RecipeStepsFragment extends Fragment {
 
-    Recipe currRecipe;
-    @BindView(R.id.lvIngredients)
-    ExpandableListView ingredientsList;
     @BindView(R.id.rvRecipeSteps)
     RecyclerView rvStepsView;
+    @BindView(R.id.lvIngredients)
+    ExpandableListView ingredientsList;
     RecyclerView.Adapter stepsAdapter;
     RecyclerView.LayoutManager stepsLayoutManager;
     private Context mContext;
+    private Recipe currRecipe;
 
+    public RecipeStepsFragment(){}
+
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_recipe_steps);
-        ButterKnife.bind(this);
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        mContext = getApplicationContext();
+        View rootView = inflater.inflate(R.layout.fragment_recipe_steps, container, false);
+        ButterKnife.bind(this, rootView);
+        mContext = getActivity();
 
-        //retrieve Recipe object
-        currRecipe =(Recipe) getIntent().getSerializableExtra("steps");
-
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(currRecipe.getName());
-
-        IngredientsAdapter ingredientAdapter = new IngredientsAdapter(getApplicationContext(),currRecipe.getIngredients());
-        ingredientsList.setAdapter(ingredientAdapter);
+        Bundle bundle = this.getArguments();
+        if(bundle!=null){
+            currRecipe = (Recipe)bundle.getSerializable("steps");
+        }
 
         //create steps RecyclerView
-        stepsLayoutManager = new LinearLayoutManager(this);
+        stepsLayoutManager = new LinearLayoutManager(mContext);
         rvStepsView.setLayoutManager(stepsLayoutManager);
         stepsAdapter = new RecipeStepsAdapter();
         rvStepsView.setAdapter(stepsAdapter);
 
+        //setup fragment navigation
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setHasOptionsMenu(true);
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(currRecipe.getName());
 
+        IngredientsAdapter ingredientAdapter = new IngredientsAdapter(mContext,currRecipe.getIngredients());
+        ingredientsList.setAdapter(ingredientAdapter);
+
+        return rootView;
     }
 
     @Override
@@ -63,7 +71,9 @@ public class RecipeStepsActivity extends AppCompatActivity {
 
         switch(id){
             case android.R.id.home:
-                onBackPressed();
+                getActivity().onBackPressed();
+                ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(getString(R.string.app_name));
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -80,9 +90,8 @@ public class RecipeStepsActivity extends AppCompatActivity {
             public ViewHolder(View v){
                 super(v);
                 view = v;
-                ButterKnife.bind(this,v);
+                ButterKnife.bind(this,view);
             }
-
         }
 
         @Override
@@ -96,20 +105,26 @@ public class RecipeStepsActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
             final Recipe.Step step = currRecipe.getSteps().get(position);
+            final int pos = position;
             holder.tvDesc.setText(step.getDesc());
 
             holder.tvDesc.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
 
-                    Intent stepsDetail = new Intent(mContext, StepsDetailActivity.class);
+                    StepsDetailFragment frag = new StepsDetailFragment();
                     Bundle bundle = new Bundle();
-                    bundle.putSerializable("detail",step);
-                    stepsDetail.putExtras(bundle);
-                    startActivity(stepsDetail);
+                    bundle.putSerializable("detail",currRecipe.getSteps());
+                    bundle.putInt("pos", pos);
+                    frag.setArguments(bundle);
+
+                    FragmentManager fragmentManager = getFragmentManager();
+                    fragmentManager.beginTransaction()
+                            .add(R.id.container, frag)
+                            .addToBackStack(null)
+                            .commit();
                 }
             });
-
         }
 
         @Override

@@ -3,11 +3,17 @@ package com.bakingapp;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -27,49 +33,89 @@ import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 
+import java.util.ArrayList;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * Created by aditya on 6/25/17.
+ * Created by aditya on 6/26/17.
  */
 
-public class StepsDetailActivity extends AppCompatActivity implements ExoPlayer.EventListener{
+public class StepsDetailFragment extends Fragment  implements ExoPlayer.EventListener{
 
     @BindView(R.id.exoView)
     SimpleExoPlayerView mPlayerView;
     @BindView(R.id.tvShortDesc)
     TextView tvShortDesc;
+    @BindView(R.id.bPrev1)
+    Button bPrev1;
+    @BindView(R.id.bNext1)
+    Button bNext1;
     private SimpleExoPlayer mExoPlayer;
     private Context mContext;
-    private final String TAG = StepsDetailActivity.class.getSimpleName();
+    private final String TAG = StepsDetailFragment.class.getSimpleName();
     private static MediaSessionCompat mMediaSession;
     private PlaybackStateCompat.Builder mStateBuilder;
-    private Recipe.Step currStep;
-    private Uri uri;
+    private ArrayList<Recipe.Step> currSteps;
+    private int pos;
 
+    public StepsDetailFragment(){}
 
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState){
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_steps_detail);
-        ButterKnife.bind(this);
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        mContext = getApplicationContext();
+        View rootView = inflater.inflate(R.layout.activity_steps_detail, container, false);
+        ButterKnife.bind(this, rootView);
+        mContext = getActivity();
 
-        currStep = (Recipe.Step) getIntent().getSerializableExtra("detail");
+        //retreive data from Bundle
+        Bundle bundle = this.getArguments();
+        currSteps = (ArrayList<Recipe.Step>) bundle.getSerializable("detail");
+        pos = bundle.getInt("pos",0);
 
+        tvShortDesc.setText(currSteps.get(pos).getShortDesc());
+
+        //setup ExoPlayer and media session
         initializeMediaSession();
-
-        if(currStep.getVideoUrl()!=null){
-            mPlayerView.setVisibility(View.VISIBLE);
-            initializePlayer(Uri.parse(currStep.getVideoUrl()));
-        }
+        initializePlayer(Uri.parse(currSteps.get(pos).getVideoUrl()));
 
 
+        bPrev1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(pos>0)
+                    openFragment(pos-1);
+                else
+                    Toast.makeText(mContext,"First Step",Toast.LENGTH_SHORT).show();
 
-        tvShortDesc.setText(currStep.getShortDesc());
+            }
+        });
+        bNext1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(pos<currSteps.size()-2)
+                    openFragment(pos+1);
+                else
+                    Toast.makeText(mContext,"Last Step",Toast.LENGTH_SHORT).show();
+            }
+        });
 
+        return rootView;
+    }
+
+    private void openFragment(int pos){
+        StepsDetailFragment frag = new StepsDetailFragment();
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("detail",currSteps);
+        bundle.putInt("pos", pos);
+        frag.setArguments(bundle);
+
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.beginTransaction()
+                .replace(R.id.container, frag)
+                .commit();
     }
 
     private void initializePlayer(Uri mediaUri) {
@@ -77,16 +123,16 @@ public class StepsDetailActivity extends AppCompatActivity implements ExoPlayer.
             // Create an instance of the ExoPlayer.
             TrackSelector trackSelector = new DefaultTrackSelector();
             LoadControl loadControl = new DefaultLoadControl();
-            mExoPlayer = ExoPlayerFactory.newSimpleInstance(this, trackSelector, loadControl);
+            mExoPlayer = ExoPlayerFactory.newSimpleInstance(mContext, trackSelector, loadControl);
             mPlayerView.setPlayer(mExoPlayer);
 
             // Set the ExoPlayer.EventListener to this activity.
-           // mExoPlayer.addListener(this);
+            mExoPlayer.addListener(this);
 
             // Prepare the MediaSource.
-            String userAgent = Util.getUserAgent(this, "RecipeVideo");
+            String userAgent = Util.getUserAgent(mContext, "RecipeVideo");
             MediaSource mediaSource = new ExtractorMediaSource(mediaUri, new DefaultDataSourceFactory(
-                    this, userAgent), new DefaultExtractorsFactory(), null, null);
+                    mContext, userAgent), new DefaultExtractorsFactory(), null, null);
             mExoPlayer.prepare(mediaSource);
             mExoPlayer.setPlayWhenReady(true);
         }
@@ -95,7 +141,7 @@ public class StepsDetailActivity extends AppCompatActivity implements ExoPlayer.
     private void initializeMediaSession() {
 
         // Create a MediaSessionCompat.
-        mMediaSession = new MediaSessionCompat(this, TAG);
+        mMediaSession = new MediaSessionCompat(mContext, TAG);
 
         // Enable callbacks from MediaButtons and TransportControls.
         mMediaSession.setFlags(
@@ -116,27 +162,15 @@ public class StepsDetailActivity extends AppCompatActivity implements ExoPlayer.
         mMediaSession.setPlaybackState(mStateBuilder.build());
 
 
-        // MySessionCallback has methods that handle callbacks from a media controller.
-        //mMediaSession.setCallback(new MySessionCallback());
-
         // Start the Media Session since the activity is active.
         mMediaSession.setActive(true);
 
     }
     private void releasePlayer() {
-        //mNotificationManager.cancelAll();
         mExoPlayer.stop();
         mExoPlayer.release();
         mExoPlayer = null;
     }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        releasePlayer();
-        mMediaSession.setActive(false);
-    }
-
 
     @Override
     public void onTimelineChanged(Timeline timeline, Object manifest) {
@@ -173,5 +207,12 @@ public class StepsDetailActivity extends AppCompatActivity implements ExoPlayer.
     @Override
     public void onPositionDiscontinuity() {
 
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        releasePlayer();
+        mMediaSession.setActive(false);
     }
 }
