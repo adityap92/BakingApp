@@ -40,12 +40,16 @@ public class MainActivity extends AppCompatActivity {
         bundle.putSerializable("recipes", recipes);
         fragRecipe.setArguments(bundle);
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .add(R.id.container, fragRecipe)
-                .addToBackStack(null)
-                .commit();
+        if(savedInstanceState==null){
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager.beginTransaction()
+                    .add(R.id.container, fragRecipe)
+                    .addToBackStack(null)
+                    .commit();
+        }
     }
+
+
 
     @Override
     public void onBackPressed() {

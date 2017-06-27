@@ -71,11 +71,17 @@ public class StepsDetailFragment extends Fragment  implements ExoPlayer.EventLis
         ButterKnife.bind(this, rootView);
         mContext = getActivity();
         setHasOptionsMenu(true);
+        setRetainInstance(true);
 
-        //retreive data from Bundle
-        Bundle bundle = this.getArguments();
-        currSteps = (ArrayList<Recipe.Step>) bundle.getSerializable("detail");
-        pos = bundle.getInt("pos",0);
+        if(savedInstanceState==null){
+            //retreive data from Bundle
+            Bundle bundle = this.getArguments();
+            currSteps = (ArrayList<Recipe.Step>) bundle.getSerializable("detail");
+            pos = bundle.getInt("pos",0);
+        }else{
+            pos = savedInstanceState.getInt("pos");
+        }
+
 
         //setup ExoPlayer and media session
         initializeMediaSession();
@@ -105,6 +111,23 @@ public class StepsDetailFragment extends Fragment  implements ExoPlayer.EventLis
 
 
         return rootView;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("pos", pos);
+        outState.putSerializable("detail", currSteps);
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        if(savedInstanceState!=null) {
+            this.pos = savedInstanceState.getInt("pos");
+            this.currSteps = (ArrayList<Recipe.Step>) savedInstanceState.getSerializable("detail");
+        }
     }
 
     private void updateUI(int pos){
