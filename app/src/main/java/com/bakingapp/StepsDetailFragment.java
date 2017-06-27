@@ -70,6 +70,7 @@ public class StepsDetailFragment extends Fragment  implements ExoPlayer.EventLis
         View rootView = inflater.inflate(R.layout.fragment_steps_detail, container, false);
         ButterKnife.bind(this, rootView);
         mContext = getActivity();
+        setHasOptionsMenu(true);
 
         //retreive data from Bundle
         Bundle bundle = this.getArguments();
@@ -94,14 +95,14 @@ public class StepsDetailFragment extends Fragment  implements ExoPlayer.EventLis
         bNext1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(pos<currSteps.size()-2)
+                if(pos<currSteps.size()-1)
                     updateUI(++pos);
                 else
                     Toast.makeText(mContext,"Last Step",Toast.LENGTH_SHORT).show();
             }
         });
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        setHasOptionsMenu(true);
+        ((AppCompatActivity) mContext).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
 
         return rootView;
     }
@@ -111,16 +112,17 @@ public class StepsDetailFragment extends Fragment  implements ExoPlayer.EventLis
 
         String vidUrl = currSteps.get(pos).getVideoUrl();
         String thumbUrl = currSteps.get(pos).getThumbnail();
+        releasePlayer();
 
         if(vidUrl.equals("")&&thumbUrl.equals("")) {
             mPlayerView.setVisibility(View.GONE);
-            releasePlayer();
+
         }else if(!vidUrl.equals("")) {
             mPlayerView.setVisibility(View.VISIBLE);
             initializePlayer(Uri.parse(currSteps.get(pos).getVideoUrl()));
         }else if(!thumbUrl.equals("")) {
             mPlayerView.setVisibility(View.VISIBLE);
-            initializePlayer(Uri.parse(currSteps.get(pos).getVideoUrl()));
+            initializePlayer(Uri.parse(currSteps.get(pos).getThumbnail()));
         }
     }
 
@@ -132,8 +134,9 @@ public class StepsDetailFragment extends Fragment  implements ExoPlayer.EventLis
             case android.R.id.home:
                 getActivity().onBackPressed();
                 return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
     }
 
     private void initializePlayer(Uri mediaUri) {

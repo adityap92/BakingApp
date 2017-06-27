@@ -55,9 +55,9 @@ public class RecipeStepsFragment extends Fragment {
         rvStepsView.setAdapter(stepsAdapter);
 
         //setup fragment navigation
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        ((AppCompatActivity) mContext).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setHasOptionsMenu(true);
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(currRecipe.getName());
+        ((AppCompatActivity) mContext).getSupportActionBar().setTitle(currRecipe.getName());
 
         IngredientsAdapter ingredientAdapter = new IngredientsAdapter(mContext,currRecipe.getIngredients());
         ingredientsList.setAdapter(ingredientAdapter);
@@ -72,11 +72,13 @@ public class RecipeStepsFragment extends Fragment {
         switch(id){
             case android.R.id.home:
                 getActivity().onBackPressed();
-                ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-                ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(getString(R.string.app_name));
+                ((AppCompatActivity) mContext).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                ((AppCompatActivity) mContext).getSupportActionBar().setTitle(R.string.app_name);
                 return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
+
     }
 
     public class RecipeStepsAdapter extends RecyclerView.Adapter<RecipeStepsAdapter.ViewHolder>{
@@ -120,7 +122,7 @@ public class RecipeStepsFragment extends Fragment {
 
                     FragmentManager fragmentManager = getFragmentManager();
                     fragmentManager.beginTransaction()
-                            .add(R.id.container, frag)
+                            .replace(R.id.container, frag)
                             .addToBackStack(null)
                             .commit();
                 }
