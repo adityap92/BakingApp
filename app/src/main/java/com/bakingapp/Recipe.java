@@ -116,5 +116,9 @@ public class Recipe implements Serializable{
         public String getVideoUrl() {
             return videoUrl;
         }
+
+        public String getThumbnail() {
+            return thumbnail;
+        }
     }
 }

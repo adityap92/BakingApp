@@ -50,15 +50,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
 
-        int count = getSupportFragmentManager().getBackStackEntryCount();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+
+        int count = fragmentManager.getBackStackEntryCount();
 
         if (count == 0) {
             super.onBackPressed();
-            //additional code
         } else {
-            getSupportFragmentManager().popBackStack();
+            fragmentManager.popBackStack();
+            fragmentManager.executePendingTransactions();
         }
-
     }
 
 

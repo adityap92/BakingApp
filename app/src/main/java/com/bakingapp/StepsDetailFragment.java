@@ -5,10 +5,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -66,7 +67,7 @@ public class StepsDetailFragment extends Fragment  implements ExoPlayer.EventLis
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        View rootView = inflater.inflate(R.layout.activity_steps_detail, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_steps_detail, container, false);
         ButterKnife.bind(this, rootView);
         mContext = getActivity();
 
@@ -75,47 +76,64 @@ public class StepsDetailFragment extends Fragment  implements ExoPlayer.EventLis
         currSteps = (ArrayList<Recipe.Step>) bundle.getSerializable("detail");
         pos = bundle.getInt("pos",0);
 
-        tvShortDesc.setText(currSteps.get(pos).getShortDesc());
-
         //setup ExoPlayer and media session
         initializeMediaSession();
-        initializePlayer(Uri.parse(currSteps.get(pos).getVideoUrl()));
 
+        updateUI(pos);
 
+        //set up button click listeners
         bPrev1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(pos>0)
-                    openFragment(pos-1);
+                    updateUI(--pos);
                 else
                     Toast.makeText(mContext,"First Step",Toast.LENGTH_SHORT).show();
-
             }
         });
         bNext1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(pos<currSteps.size()-2)
-                    openFragment(pos+1);
+                    updateUI(++pos);
                 else
                     Toast.makeText(mContext,"Last Step",Toast.LENGTH_SHORT).show();
             }
         });
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setHasOptionsMenu(true);
 
         return rootView;
     }
 
-    private void openFragment(int pos){
-        StepsDetailFragment frag = new StepsDetailFragment();
-        Bundle bundle = new Bundle();
-        bundle.putSerializable("detail",currSteps);
-        bundle.putInt("pos", pos);
-        frag.setArguments(bundle);
+    private void updateUI(int pos){
+        tvShortDesc.setText(currSteps.get(pos).getShortDesc());
 
-        FragmentManager fragmentManager = getFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.container, frag)
-                .commit();
+        String vidUrl = currSteps.get(pos).getVideoUrl();
+        String thumbUrl = currSteps.get(pos).getThumbnail();
+
+        if(vidUrl.equals("")&&thumbUrl.equals("")) {
+            mPlayerView.setVisibility(View.GONE);
+            releasePlayer();
+        }else if(!vidUrl.equals("")) {
+            mPlayerView.setVisibility(View.VISIBLE);
+            initializePlayer(Uri.parse(currSteps.get(pos).getVideoUrl()));
+        }else if(!thumbUrl.equals("")) {
+            mPlayerView.setVisibility(View.VISIBLE);
+            initializePlayer(Uri.parse(currSteps.get(pos).getVideoUrl()));
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        switch(id){
+            case android.R.id.home:
+                getActivity().onBackPressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void initializePlayer(Uri mediaUri) {
@@ -139,7 +157,6 @@ public class StepsDetailFragment extends Fragment  implements ExoPlayer.EventLis
     }
 
     private void initializeMediaSession() {
-
         // Create a MediaSessionCompat.
         mMediaSession = new MediaSessionCompat(mContext, TAG);
 
@@ -161,15 +178,16 @@ public class StepsDetailFragment extends Fragment  implements ExoPlayer.EventLis
 
         mMediaSession.setPlaybackState(mStateBuilder.build());
 
-
         // Start the Media Session since the activity is active.
         mMediaSession.setActive(true);
-
     }
+
     private void releasePlayer() {
-        mExoPlayer.stop();
-        mExoPlayer.release();
-        mExoPlayer = null;
+        if(mExoPlayer!=null){
+            mExoPlayer.stop();
+            mExoPlayer.release();
+            mExoPlayer = null;
+        }
     }
 
     @Override
