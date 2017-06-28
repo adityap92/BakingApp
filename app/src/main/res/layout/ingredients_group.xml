@@ -7,7 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/tvIngredientGroup"
-        android:text="Ingredients:"
+        android:text="@string/ingredients_group"
         android:textColor="@android:color/black"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"/>
 

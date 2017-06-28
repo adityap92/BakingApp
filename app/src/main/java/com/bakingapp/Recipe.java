@@ -39,7 +39,7 @@ public class Recipe implements Serializable{
      * @param meas
      * @param iName
      */
-    public void addIngredient(int quant, String meas, String iName){
+    public void addIngredient(float quant, String meas, String iName){
         this.ingredients.add(new Ingredient(quant,meas,iName));
     }
 
@@ -66,11 +66,11 @@ public class Recipe implements Serializable{
 
     public static class Ingredient implements Serializable{
 
-        private int quantity;
+        private float quantity;
         private String measure;
         private String ingredientName;
 
-        public Ingredient(int quantity, String measure, String ingredientName){
+        public Ingredient(float quantity, String measure, String ingredientName){
             this.quantity = quantity;
             this.measure = measure;
             this.ingredientName = ingredientName;
@@ -80,7 +80,7 @@ public class Recipe implements Serializable{
             return this.ingredientName;
         }
 
-        public int getQuantity() {
+        public float getQuantity() {
             return quantity;
         }
 

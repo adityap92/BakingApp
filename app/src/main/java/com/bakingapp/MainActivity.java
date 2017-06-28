@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements RecipeStepsFragme
                                 JSONArray ingredients = obj.getJSONArray("ingredients");
                                 for(int j = 0 ; j < ingredients.length(); j++){
                                     JSONObject obj2 = ingredients.getJSONObject(j);
-                                    recipes.get(i).addIngredient(obj2.getInt("quantity"),
+                                    recipes.get(i).addIngredient(Float.parseFloat(obj2.getString("quantity")),
                                             obj2.getString("measure"),
                                             obj2.getString("ingredient"));
                                 }

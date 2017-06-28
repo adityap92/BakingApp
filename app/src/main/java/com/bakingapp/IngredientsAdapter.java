@@ -29,7 +29,7 @@ public class IngredientsAdapter extends BaseExpandableListAdapter {
         this.ingredients = i;
         this.context = c;
         groupName = new ArrayList<String>();
-        groupName.add("Ingredients:");
+        groupName.add("Ingredients: (Click to View)");
 
     }
 
