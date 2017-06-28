@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -47,11 +48,20 @@ public class RecipesFragment extends Fragment {
         }
         mainContext = getActivity();
 
-        //setup linear layout manager
-        recipeLayoutManager = new LinearLayoutManager(mainContext);
-        recipeView.setLayoutManager(recipeLayoutManager);
-        recipeAdapter = new MyAdapter(recipes);
-        recipeView.setAdapter(recipeAdapter);
+        boolean tablet = getResources().getBoolean(R.bool.isTablet);
+        if(!tablet){
+            //setup linear layout manager
+            recipeLayoutManager = new LinearLayoutManager(mainContext);
+            recipeView.setLayoutManager(recipeLayoutManager);
+            recipeAdapter = new MyAdapter(recipes);
+            recipeView.setAdapter(recipeAdapter);
+        }else{
+            //setup grid layout if using tablet
+            recipeLayoutManager = new GridLayoutManager(mainContext,4);
+            recipeView.setLayoutManager(recipeLayoutManager);
+            recipeAdapter = new MyAdapter(recipes);
+            recipeView.setAdapter(recipeAdapter);
+        }
 
         return rootView;
     }
