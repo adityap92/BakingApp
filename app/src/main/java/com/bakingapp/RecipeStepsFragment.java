@@ -84,11 +84,6 @@ public class RecipeStepsFragment extends Fragment {
 
         if(tablet){
             StepsDetailFragment frag = new StepsDetailFragment();
-//            Bundle bund = new Bundle();
-//            bund.putSerializable("detail",currRecipe.getSteps());
-//            bund.putInt("pos", 0);
-//            frag.setArguments(bund);
-
             FragmentManager fragmentManager = getFragmentManager();
             fragmentManager.beginTransaction()
                     .replace(R.id.detail_container, frag, "StepsDetailFragment")

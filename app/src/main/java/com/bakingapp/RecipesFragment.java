@@ -120,7 +120,7 @@ public class RecipesFragment extends Fragment {
 
                     FragmentManager fragmentManager = getFragmentManager();
                     fragmentManager.beginTransaction()
-                            .add(R.id.container, fragStep)
+                            .add(R.id.container, fragStep, "RecipeStepsFragment")
                             .addToBackStack(null)
                             .commit();
                 }

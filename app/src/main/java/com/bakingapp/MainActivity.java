@@ -4,13 +4,13 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -23,6 +23,8 @@ public class MainActivity extends AppCompatActivity implements RecipeStepsFragme
     private Context mainContext;
     public static Recipe currentRecipe;
     public int currRecipeStep;
+    final String TAG = MainActivity.class.getSimpleName();
+    public RecipesFragment fragRecipe;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,31 +34,41 @@ public class MainActivity extends AppCompatActivity implements RecipeStepsFragme
         ButterKnife.bind(this);
 
         mainContext = getApplicationContext();
-        recipes = new ArrayList<Recipe>();
-        currRecipeStep = 0;
 
-        //pull and parse Recipe JSON
-        getRecipes();
+        if(savedInstanceState==null){
+            recipes = new ArrayList<Recipe>();
+            currRecipeStep = 0;
+            //pull and parse Recipe JSON
+            getRecipes();
+        }else{
+            currRecipeStep = savedInstanceState.getInt("pos");
+            recipes = (ArrayList<Recipe>) savedInstanceState.getSerializable("recipes");
+        }
+    }
 
-        RecipesFragment fragRecipe = new RecipesFragment();
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putSerializable("recipes", recipes);
+        outState.putInt("pos",currRecipeStep);
+    }
+
+    public void openFragment(){
+        fragRecipe = new RecipesFragment();
         Bundle bundle = new Bundle();
         bundle.putSerializable("recipes", recipes);
         fragRecipe.setArguments(bundle);
 
-        if(savedInstanceState==null){
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            fragmentManager.beginTransaction()
-                    .add(R.id.container, fragRecipe)
-                    .addToBackStack(null)
-                    .commit();
-        }
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction()
+                .add(R.id.container, fragRecipe, "RecipeFragment")
+                .addToBackStack(null)
+                .commit();
     }
 
     public void setCurrentRecipe(Recipe recipe){
         currentRecipe = recipe;
     }
-
-
 
     @Override
     public void onBackPressed() {
@@ -106,8 +118,9 @@ public class MainActivity extends AppCompatActivity implements RecipeStepsFragme
                                             obj3.getString("thumbnailURL"));
                                 }
                             }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                            openFragment();
+                        } catch (Exception e) {
+                            Log.e(TAG,e.getLocalizedMessage());
                         }
                     }
         }, new Response.ErrorListener() {
@@ -129,4 +142,5 @@ public class MainActivity extends AppCompatActivity implements RecipeStepsFragme
     public int getStepSelected(){
         return this.currRecipeStep;
     }
+
 }
