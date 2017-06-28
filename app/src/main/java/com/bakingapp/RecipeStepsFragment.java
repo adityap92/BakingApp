@@ -32,6 +32,23 @@ public class RecipeStepsFragment extends Fragment {
     RecyclerView.LayoutManager stepsLayoutManager;
     private Context mContext;
     public static Recipe currRecipe;
+    private boolean tablet;
+    OnStepClickListener mCallback;
+
+    public interface OnStepClickListener{
+        void onStepSelected(int position);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try{
+            mCallback = (OnStepClickListener) context;
+        }catch(ClassCastException e){
+            throw new ClassCastException(context.toString()
+                    + "must implement interface");
+        }
+    }
 
     public RecipeStepsFragment(){}
 
@@ -42,7 +59,7 @@ public class RecipeStepsFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_recipe_steps, container, false);
         ButterKnife.bind(this, rootView);
         mContext = getActivity();
-        boolean tablet = getResources().getBoolean(R.bool.isTablet);
+        tablet = getResources().getBoolean(R.bool.isTablet);
 
         Bundle bundle = this.getArguments();
         if(bundle!=null){
@@ -59,18 +76,18 @@ public class RecipeStepsFragment extends Fragment {
             //setup fragment navigation
             ((AppCompatActivity) mContext).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             setHasOptionsMenu(true);
-            ((AppCompatActivity) mContext).getSupportActionBar().setTitle(currRecipe.getName());
         }
+        ((AppCompatActivity) mContext).getSupportActionBar().setTitle(currRecipe.getName());
 
         IngredientsAdapter ingredientAdapter = new IngredientsAdapter(mContext,currRecipe.getIngredients());
         ingredientsList.setAdapter(ingredientAdapter);
 
         if(tablet){
             StepsDetailFragment frag = new StepsDetailFragment();
-            Bundle bund = new Bundle();
-            bund.putSerializable("detail",currRecipe.getSteps());
-            bund.putInt("pos", 0);
-            frag.setArguments(bund);
+//            Bundle bund = new Bundle();
+//            bund.putSerializable("detail",currRecipe.getSteps());
+//            bund.putInt("pos", 0);
+//            frag.setArguments(bund);
 
             FragmentManager fragmentManager = getFragmentManager();
             fragmentManager.beginTransaction()
@@ -129,18 +146,22 @@ public class RecipeStepsFragment extends Fragment {
             holder.tvDesc.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    mCallback.onStepSelected(pos);
 
-                    StepsDetailFragment frag = new StepsDetailFragment();
-                    Bundle bundle = new Bundle();
-                    bundle.putSerializable("detail",currRecipe.getSteps());
-                    bundle.putInt("pos", pos);
-                    frag.setArguments(bundle);
-
-                    FragmentManager fragmentManager = getFragmentManager();
-                    fragmentManager.beginTransaction()
-                            .replace(R.id.container, frag, "StepsDetailFragment")
-                            .addToBackStack(null)
-                            .commit();
+                    if(!tablet){
+                        StepsDetailFragment frag = new StepsDetailFragment();
+                        FragmentManager fragmentManager = getFragmentManager();
+                        fragmentManager.beginTransaction()
+                                .replace(R.id.container, frag, "StepsDetailFragment")
+                                .addToBackStack(null)
+                                .commit();
+                    }else{
+                        StepsDetailFragment frag = new StepsDetailFragment();
+                        FragmentManager fragmentManager = getFragmentManager();
+                        fragmentManager.beginTransaction()
+                                .replace(R.id.detail_container, frag, "StepsDetailFragment")
+                                .commit();
+                    }
                 }
             });
         }

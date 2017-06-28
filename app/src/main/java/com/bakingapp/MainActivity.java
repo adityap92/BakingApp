@@ -17,11 +17,12 @@ import java.util.ArrayList;
 
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements RecipeStepsFragment.OnStepClickListener{
 
     public ArrayList<Recipe> recipes;
     private Context mainContext;
     public static Recipe currentRecipe;
+    public int currRecipeStep;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
         mainContext = getApplicationContext();
         recipes = new ArrayList<Recipe>();
+        currRecipeStep = 0;
 
         //pull and parse Recipe JSON
         getRecipes();
@@ -68,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             fragmentManager.popBackStack();
             fragmentManager.executePendingTransactions();
+            StepsDetailFragment.releasePlayer();
         }
     }
 
@@ -116,5 +119,14 @@ public class MainActivity extends AppCompatActivity {
 
         // Access the RequestQueue through your singleton class.
         RemoteConnection.getInstance(mainContext).addToRequestQueue(jsonArrayRequest);
+    }
+
+    @Override
+    public void onStepSelected(int position) {
+        this.currRecipeStep = position;
+    }
+
+    public int getStepSelected(){
+        return this.currRecipeStep;
     }
 }

@@ -53,10 +53,10 @@ public class StepsDetailFragment extends Fragment  implements ExoPlayer.EventLis
     Button bPrev1;
     @BindView(R.id.bNext1)
     Button bNext1;
-    private SimpleExoPlayer mExoPlayer;
+    public static SimpleExoPlayer mExoPlayer;
+    public static MediaSessionCompat mMediaSession;
     private Context mContext;
     private final String TAG = StepsDetailFragment.class.getSimpleName();
-    private static MediaSessionCompat mMediaSession;
     private PlaybackStateCompat.Builder mStateBuilder;
     private ArrayList<Recipe.Step> currSteps;
     private int pos;
@@ -66,17 +66,7 @@ public class StepsDetailFragment extends Fragment  implements ExoPlayer.EventLis
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(savedInstanceState==null){
-            //retreive data from Bundle
-            Bundle bundle = this.getArguments();
-            currSteps = MainActivity.currentRecipe.getSteps();
-            if(getResources().getBoolean(R.bool.isTablet)){
-                pos=0;
-            }else
-                pos = bundle.getInt("pos",0);
-        }else{
-            pos = savedInstanceState.getInt("pos");
-        }
+        currSteps = MainActivity.currentRecipe.getSteps();
     }
 
     @Nullable
@@ -91,29 +81,31 @@ public class StepsDetailFragment extends Fragment  implements ExoPlayer.EventLis
         if(!tablet){
             setHasOptionsMenu(true);
             ((AppCompatActivity) mContext).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
-
+        }else
+            ((AppCompatActivity) mContext).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 
         //setup ExoPlayer and media session
         initializeMediaSession();
-        updateUI(pos);
+        updateUI();
 
         //set up button click listeners
         bPrev1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(pos>0)
-                    updateUI(--pos);
-                else
+                if(pos>0) {
+                    ((MainActivity) mContext).onStepSelected(--pos);
+                    updateUI();
+                }else
                     Toast.makeText(mContext,"First Step",Toast.LENGTH_SHORT).show();
             }
         });
         bNext1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(pos<currSteps.size()-1)
-                    updateUI(++pos);
-                else
+                if(pos<currSteps.size()-1) {
+                    ((MainActivity) mContext).onStepSelected(++pos);
+                    updateUI();
+                }else
                     Toast.makeText(mContext,"Last Step",Toast.LENGTH_SHORT).show();
             }
         });
@@ -121,39 +113,25 @@ public class StepsDetailFragment extends Fragment  implements ExoPlayer.EventLis
         return rootView;
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt("pos", pos);
-        outState.putSerializable("detail", currSteps);
-    }
+    private void updateUI(){
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+        Recipe.Step  step = MainActivity.currentRecipe.getSteps().get(
+                ((MainActivity) getActivity()).getStepSelected());
 
-        if(savedInstanceState!=null) {
-            this.pos = savedInstanceState.getInt("pos");
-            this.currSteps = (ArrayList<Recipe.Step>) savedInstanceState.getSerializable("detail");
-        }
-    }
+        tvShortDesc.setText(step.getShortDesc());
 
-    private void updateUI(int pos){
-        tvShortDesc.setText(currSteps.get(pos).getShortDesc());
-
-        String vidUrl = currSteps.get(pos).getVideoUrl();
-        String thumbUrl = currSteps.get(pos).getThumbnail();
+        String vidUrl = step.getVideoUrl();
+        String thumbUrl = step.getThumbnail();
         releasePlayer();
 
         if(vidUrl.equals("")&&thumbUrl.equals("")) {
             mPlayerView.setVisibility(View.GONE);
-
         }else if(!vidUrl.equals("")) {
             mPlayerView.setVisibility(View.VISIBLE);
-            initializePlayer(Uri.parse(currSteps.get(pos).getVideoUrl()));
+            initializePlayer(Uri.parse(step.getVideoUrl()));
         }else if(!thumbUrl.equals("")) {
             mPlayerView.setVisibility(View.VISIBLE);
-            initializePlayer(Uri.parse(currSteps.get(pos).getThumbnail()));
+            initializePlayer(Uri.parse(step.getThumbnail()));
         }
     }
 
@@ -216,7 +194,7 @@ public class StepsDetailFragment extends Fragment  implements ExoPlayer.EventLis
         mMediaSession.setActive(true);
     }
 
-    public void releasePlayer() {
+    public static void releasePlayer() {
         if(mExoPlayer!=null){
             mExoPlayer.stop();
             mExoPlayer.release();
