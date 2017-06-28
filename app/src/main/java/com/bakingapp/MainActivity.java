@@ -21,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
 
     public ArrayList<Recipe> recipes;
     private Context mainContext;
+    public static Recipe currentRecipe;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +48,10 @@ public class MainActivity extends AppCompatActivity {
                     .addToBackStack(null)
                     .commit();
         }
+    }
+
+    public void setCurrentRecipe(Recipe recipe){
+        currentRecipe = recipe;
     }
 
 

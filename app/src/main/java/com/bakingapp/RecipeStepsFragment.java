@@ -31,7 +31,7 @@ public class RecipeStepsFragment extends Fragment {
     RecyclerView.Adapter stepsAdapter;
     RecyclerView.LayoutManager stepsLayoutManager;
     private Context mContext;
-    private Recipe currRecipe;
+    public static Recipe currRecipe;
 
     public RecipeStepsFragment(){}
 
@@ -42,6 +42,7 @@ public class RecipeStepsFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_recipe_steps, container, false);
         ButterKnife.bind(this, rootView);
         mContext = getActivity();
+        boolean tablet = getResources().getBoolean(R.bool.isTablet);
 
         Bundle bundle = this.getArguments();
         if(bundle!=null){
@@ -54,13 +55,28 @@ public class RecipeStepsFragment extends Fragment {
         stepsAdapter = new RecipeStepsAdapter();
         rvStepsView.setAdapter(stepsAdapter);
 
-        //setup fragment navigation
-        ((AppCompatActivity) mContext).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        setHasOptionsMenu(true);
-        ((AppCompatActivity) mContext).getSupportActionBar().setTitle(currRecipe.getName());
+        if(!tablet){
+            //setup fragment navigation
+            ((AppCompatActivity) mContext).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            setHasOptionsMenu(true);
+            ((AppCompatActivity) mContext).getSupportActionBar().setTitle(currRecipe.getName());
+        }
 
         IngredientsAdapter ingredientAdapter = new IngredientsAdapter(mContext,currRecipe.getIngredients());
         ingredientsList.setAdapter(ingredientAdapter);
+
+        if(tablet){
+            StepsDetailFragment frag = new StepsDetailFragment();
+            Bundle bund = new Bundle();
+            bund.putSerializable("detail",currRecipe.getSteps());
+            bund.putInt("pos", 0);
+            frag.setArguments(bund);
+
+            FragmentManager fragmentManager = getFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.detail_container, frag, "StepsDetailFragment")
+                    .commit();
+        }
 
         return rootView;
     }

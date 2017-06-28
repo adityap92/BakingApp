@@ -115,6 +115,9 @@ public class RecipesFragment extends Fragment {
                     bundle.putSerializable("steps", r);
                     fragStep.setArguments(bundle);
 
+                    //set current recipe for StepsDetail
+                    ((MainActivity) getActivity()).setCurrentRecipe(r);
+
                     FragmentManager fragmentManager = getFragmentManager();
                     fragmentManager.beginTransaction()
                             .add(R.id.container, fragStep)

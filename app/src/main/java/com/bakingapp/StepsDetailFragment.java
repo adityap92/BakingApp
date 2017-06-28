@@ -63,6 +63,22 @@ public class StepsDetailFragment extends Fragment  implements ExoPlayer.EventLis
 
     public StepsDetailFragment(){}
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if(savedInstanceState==null){
+            //retreive data from Bundle
+            Bundle bundle = this.getArguments();
+            currSteps = MainActivity.currentRecipe.getSteps();
+            if(getResources().getBoolean(R.bool.isTablet)){
+                pos=0;
+            }else
+                pos = bundle.getInt("pos",0);
+        }else{
+            pos = savedInstanceState.getInt("pos");
+        }
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -70,22 +86,16 @@ public class StepsDetailFragment extends Fragment  implements ExoPlayer.EventLis
         View rootView = inflater.inflate(R.layout.fragment_steps_detail, container, false);
         ButterKnife.bind(this, rootView);
         mContext = getActivity();
-        setHasOptionsMenu(true);
-        setRetainInstance(true);
 
-        if(savedInstanceState==null){
-            //retreive data from Bundle
-            Bundle bundle = this.getArguments();
-            currSteps = (ArrayList<Recipe.Step>) bundle.getSerializable("detail");
-            pos = bundle.getInt("pos",0);
-        }else{
-            pos = savedInstanceState.getInt("pos");
+        boolean tablet = getResources().getBoolean(R.bool.isTablet);
+        if(!tablet){
+            setHasOptionsMenu(true);
+            ((AppCompatActivity) mContext).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
 
         //setup ExoPlayer and media session
         initializeMediaSession();
-
         updateUI(pos);
 
         //set up button click listeners
@@ -107,8 +117,6 @@ public class StepsDetailFragment extends Fragment  implements ExoPlayer.EventLis
                     Toast.makeText(mContext,"Last Step",Toast.LENGTH_SHORT).show();
             }
         });
-        ((AppCompatActivity) mContext).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
 
         return rootView;
     }
@@ -208,7 +216,7 @@ public class StepsDetailFragment extends Fragment  implements ExoPlayer.EventLis
         mMediaSession.setActive(true);
     }
 
-    private void releasePlayer() {
+    public void releasePlayer() {
         if(mExoPlayer!=null){
             mExoPlayer.stop();
             mExoPlayer.release();
@@ -254,8 +262,8 @@ public class StepsDetailFragment extends Fragment  implements ExoPlayer.EventLis
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onDestroyView() {
+        super.onDestroyView();
         releasePlayer();
         mMediaSession.setActive(false);
     }
