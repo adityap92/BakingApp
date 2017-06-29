@@ -33,7 +33,9 @@
 
         <provider
             android:authorities="com.bakingapp.authority"
-            android:name="com.bakingapp.data.RecipeProvider"/>
+            android:name="com.bakingapp.data.RecipeProvider"
+            android:grantUriPermissions="true"
+            android:exported="true"/>
     </application>
 
 </manifest>

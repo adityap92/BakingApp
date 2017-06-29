@@ -18,4 +18,11 @@ public class RecipeIngredients {
     @SimpleSQLColumn("col_ingredient")
     public String recipeIngredient;
 
+    public RecipeIngredients(){}
+
+    public RecipeIngredients(String recipeName, String recipeIngredient){
+        this.recipeName = recipeName;
+        this.recipeIngredient = recipeIngredient;
+    }
+
 }
