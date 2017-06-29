@@ -1,6 +1,8 @@
 package com.bakingapp;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
@@ -9,11 +11,14 @@ import android.util.Log;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.bakingapp.data.RecipeIngredients;
+import com.bakingapp.data.RecipeTable;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.ButterKnife;
 
@@ -44,6 +49,36 @@ public class MainActivity extends AppCompatActivity implements RecipeStepsFragme
             currRecipeStep = savedInstanceState.getInt("pos");
             recipes = (ArrayList<Recipe>) savedInstanceState.getSerializable("recipes");
         }
+    }
+
+    public void deleteEntries(){
+        getContentResolver().delete(RecipeTable.CONTENT_URI,null,null);
+    }
+
+    public void addDBentries(){
+
+        if(recipes.size()>0&&getRows()==0){
+            for(Recipe r : recipes){
+                for(Recipe.Ingredient i : r.getIngredients()){
+                    ContentValues cv = new ContentValues();
+                    cv.put(RecipeTable.FIELD_COL_NAME, r.getName());
+                    cv.put(RecipeTable.FIELD_COL_INGREDIENT, i.getIngredientName());
+                    getContentResolver().insert(RecipeTable.CONTENT_URI, cv);
+                }
+            }
+
+        }
+    }
+
+    public int getRows(){
+        Cursor cursor=null;
+        List<RecipeIngredients> testRows=null;
+        try{
+            cursor = getContentResolver().query(RecipeTable.CONTENT_URI,null,null,null,null);
+            testRows = RecipeTable.getRows(cursor,true);
+        }catch(Exception e){}
+
+        return testRows==null?0:testRows.size();
     }
 
     @Override
@@ -118,6 +153,7 @@ public class MainActivity extends AppCompatActivity implements RecipeStepsFragme
                                             obj3.getString("thumbnailURL"));
                                 }
                             }
+                            addDBentries();
                             openFragment();
                         } catch (Exception e) {
                             Log.e(TAG,e.getLocalizedMessage());
