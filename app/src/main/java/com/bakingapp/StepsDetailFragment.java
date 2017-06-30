@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
@@ -14,7 +15,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -92,21 +92,33 @@ public class StepsDetailFragment extends Fragment  implements ExoPlayer.EventLis
         bPrev1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                pos=((MainActivity) mContext).getStepSelected();
                 if(pos>0) {
                     ((MainActivity) mContext).onStepSelected(--pos);
                     updateUI();
-                }else
-                    Toast.makeText(mContext,"First Step",Toast.LENGTH_SHORT).show();
+                }else{
+                    Snackbar.make(((AppCompatActivity) mContext)
+                                    .findViewById(R.id.myCoordinatorLayout),
+                            R.string.first_step,
+                            Snackbar.LENGTH_SHORT)
+                            .show();
+                }
             }
         });
         bNext1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                pos=((MainActivity) mContext).getStepSelected();
                 if(pos<currSteps.size()-1) {
                     ((MainActivity) mContext).onStepSelected(++pos);
                     updateUI();
-                }else
-                    Toast.makeText(mContext,"Last Step",Toast.LENGTH_SHORT).show();
+                }else{
+                    Snackbar.make(((AppCompatActivity) mContext)
+                                    .findViewById(R.id.myCoordinatorLayout),
+                            R.string.last_step,
+                            Snackbar.LENGTH_SHORT)
+                            .show();
+                }
             }
         });
 

@@ -10,4 +10,6 @@
     <string name="add_widget">Add widget</string>
     <string name="recipes">Recipes:</string>
     <string name="ingredients">Ingredients:</string>
+    <string name="first_step">First Step</string>
+    <string name="last_step">Last Step</string>
 </resources>
