@@ -22,6 +22,12 @@ import java.util.List;
 
 import butterknife.ButterKnife;
 
+/**
+ * Main Activity of App to handle pulling of Recipe JSON Data
+ * Manages application data to handle fragments easier
+ *
+ * @author aditya
+ */
 public class MainActivity extends AppCompatActivity implements RecipeStepsFragment.OnStepClickListener{
 
     public ArrayList<Recipe> recipes;
@@ -51,10 +57,12 @@ public class MainActivity extends AppCompatActivity implements RecipeStepsFragme
         }
     }
 
+    //clear DB table
     public void deleteEntries(){
         getContentResolver().delete(RecipeTable.CONTENT_URI,null,null);
     }
 
+    //add entries to DB for easier access through UI and widgets
     public void addDBentries(){
 
         if(recipes.size()>0&&getRows()==0){
@@ -70,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements RecipeStepsFragme
         }
     }
 
+    //return rows to check if DB is empty or not
     public int getRows(){
         Cursor cursor=null;
         List<RecipeIngredients> testRows=null;
@@ -115,6 +124,7 @@ public class MainActivity extends AppCompatActivity implements RecipeStepsFragme
         if (count == 0) {
             super.onBackPressed();
         } else {
+            //manage fragments for easier application navigation
             fragmentManager.popBackStack();
             fragmentManager.executePendingTransactions();
             StepsDetailFragment.releasePlayer();
@@ -122,6 +132,7 @@ public class MainActivity extends AppCompatActivity implements RecipeStepsFragme
     }
 
 
+    //pulls JSON and sets up Recipe Objects
     public void getRecipes(){
 
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(getString(R.string.recipe_url),

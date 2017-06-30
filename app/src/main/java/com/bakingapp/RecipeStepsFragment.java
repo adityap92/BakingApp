@@ -19,6 +19,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
+ * Fragment to display RecipeSteps
+ *
  * Created by aditya on 6/26/17.
  */
 
@@ -132,6 +134,7 @@ public class RecipeStepsFragment extends Fragment {
             return new ViewHolder(v);
         }
 
+        //fill in step views
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
             final Recipe.Step step = currRecipe.getSteps().get(position);

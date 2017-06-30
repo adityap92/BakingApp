@@ -66,6 +66,7 @@ public class RecipesFragment extends Fragment {
         return rootView;
     }
 
+    //Adapter for Recipes that are displayed with cardview
     public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder>{
 
         public ArrayList<Recipe> recip;
