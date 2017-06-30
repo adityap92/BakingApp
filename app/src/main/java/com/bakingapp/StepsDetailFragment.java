@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.exoplayer2.DefaultLoadControl;
@@ -33,6 +34,7 @@ import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -60,6 +62,8 @@ public class StepsDetailFragment extends Fragment  implements ExoPlayer.EventLis
     private PlaybackStateCompat.Builder mStateBuilder;
     private ArrayList<Recipe.Step> currSteps;
     private int pos;
+    @BindView(R.id.ivThumbnail)
+    ImageView thumbnail;
 
     public StepsDetailFragment(){}
 
@@ -138,12 +142,15 @@ public class StepsDetailFragment extends Fragment  implements ExoPlayer.EventLis
 
         if(vidUrl.equals("")&&thumbUrl.equals("")) {
             mPlayerView.setVisibility(View.GONE);
+            thumbnail.setVisibility(View.GONE);
         }else if(!vidUrl.equals("")) {
+            thumbnail.setVisibility(View.GONE);
             mPlayerView.setVisibility(View.VISIBLE);
-            initializePlayer(Uri.parse(step.getVideoUrl()));
+            initializePlayer();
         }else if(!thumbUrl.equals("")) {
-            mPlayerView.setVisibility(View.VISIBLE);
-            initializePlayer(Uri.parse(step.getThumbnail()));
+            mPlayerView.setVisibility(View.GONE);
+            thumbnail.setVisibility(View.VISIBLE);
+            Picasso.with(mContext).load(step.getThumbnail()).into(thumbnail);
         }
     }
 
@@ -160,8 +167,16 @@ public class StepsDetailFragment extends Fragment  implements ExoPlayer.EventLis
         }
     }
 
-    private void initializePlayer(Uri mediaUri) {
-        if (mExoPlayer == null) {
+    private void initializePlayer() {
+
+        Recipe.Step  step = MainActivity.currentRecipe.getSteps().get(
+                ((MainActivity) getActivity()).getStepSelected());
+
+        Uri mediaUri = null;
+        if(!step.getVideoUrl().equals(""))
+             mediaUri= Uri.parse(step.getVideoUrl());
+
+        if (mExoPlayer == null && mediaUri != null) {
             // Create an instance of the ExoPlayer.
             TrackSelector trackSelector = new DefaultTrackSelector();
             LoadControl loadControl = new DefaultLoadControl();
@@ -252,8 +267,15 @@ public class StepsDetailFragment extends Fragment  implements ExoPlayer.EventLis
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
+    public void onResume() {
+        super.onResume();
+        initializePlayer();
+        mMediaSession.setActive(true);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
         releasePlayer();
         mMediaSession.setActive(false);
     }
