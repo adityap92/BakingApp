@@ -3,6 +3,7 @@ package com.bakingapp;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
@@ -20,23 +21,30 @@ public class ListWidgetService extends RemoteViewsService {
 
     Context mContext;
 
+
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
         mContext = getApplicationContext();
-        return (new ListRemoteViewsFactory(mContext));
+
+        return (new ListRemoteViewsFactory(mContext,
+                intent.getBooleanExtra("ingredients", false),
+                intent.getIntExtra("pos",0)));
     }
 }
 
 class ListRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
 
     Context mContext;
-    Cursor mCursor;
+    boolean displayIngredients;
     List<RecipeIngredients> recipes;
     List<Recipe> widgetRecipes;
+    int pos;
 
 
-        public ListRemoteViewsFactory(Context applicationContext){
+        public ListRemoteViewsFactory(Context applicationContext, boolean ingredients, int position){
             mContext = applicationContext;
+            displayIngredients = ingredients;
+            pos = position;
         }
 
         @Override
@@ -45,6 +53,7 @@ class ListRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
             widgetRecipes = new ArrayList<Recipe>();
         }
 
+        //setup new list to access recipe and ingredient data easier
         public void setupLists(){
 
             ArrayList<String> names = new ArrayList<String>();
@@ -60,13 +69,15 @@ class ListRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
 
         @Override
         public void onDataSetChanged() {
-            Cursor cursor=null;
-            cursor = mContext.getContentResolver().query(RecipeTable.CONTENT_URI,null,null,null,null);
-            recipes = RecipeTable.getRows(cursor,true);
-            cursor.close();
 
-            if(widgetRecipes.size()==0)
+            if(widgetRecipes.size()==0){
+                Cursor cursor=null;
+                cursor = mContext.getContentResolver().query(RecipeTable.CONTENT_URI,null,null,null,null);
+                recipes = RecipeTable.getRows(cursor,true);
+                cursor.close();
+
                 setupLists();
+            }
         }
 
         @Override
@@ -75,15 +86,29 @@ class ListRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
 
         @Override
         public int getCount() {
-            return widgetRecipes.size();
+            return displayIngredients?widgetRecipes.get(pos).getIngredients().size():
+                    widgetRecipes.size();
         }
 
         @Override
         public RemoteViews getViewAt(int position) {
 
-            RemoteViews views = new RemoteViews(mContext.getPackageName(), R.layout.widget_list_item);
+            RemoteViews views = new RemoteViews(mContext.getPackageName(),
+                    R.layout.widget_list_item);
 
-            views.setTextViewText(R.id.tvWidgetItem, widgetRecipes.get(position).getName());
+            if(displayIngredients){
+                views.setTextViewText(R.id.tvWidgetItem,
+                        widgetRecipes.get(pos).getIngredients().get(position).getIngredientName());
+                views.setViewVisibility(R.id.bWidgetPrev, View.VISIBLE);
+            }else{
+                views.setTextViewText(R.id.tvWidgetItem, widgetRecipes.get(position).getName());
+
+                Intent ingredientIntent = new Intent();
+                ingredientIntent.putExtra("ingredients", true);
+                ingredientIntent.putExtra("pos", position);
+                views.setOnClickFillInIntent(R.id.tvWidgetItem, ingredientIntent);
+            }
+
 
             return views;
         }
