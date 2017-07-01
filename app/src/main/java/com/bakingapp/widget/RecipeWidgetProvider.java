@@ -1,11 +1,12 @@
-package com.bakingapp;
+package com.bakingapp.widget;
 
-import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
 import android.widget.RemoteViews;
+
+import com.bakingapp.R;
 
 /**
  * Implementation of App Widget functionality.
@@ -21,13 +22,6 @@ public class RecipeWidgetProvider extends AppWidgetProvider {
 
         Intent intent = new Intent(context, ListWidgetService.class);
         views.setRemoteAdapter(R.id.lvWidget,intent);
-
-        Intent ingredientIntent = new Intent(context, ListWidgetService.class);
-        PendingIntent pendingIntent = PendingIntent.getService(
-                context,0, ingredientIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        views.setPendingIntentTemplate(R.id.lvWidget, pendingIntent);
-
 
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, views);
