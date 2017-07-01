@@ -1,19 +1,22 @@
 package com.bakingapp;
 
-import android.content.Context;
-import android.support.test.InstrumentationRegistry;
+import android.support.test.espresso.Espresso;
+import android.support.test.espresso.IdlingResource;
+import android.support.test.espresso.contrib.RecyclerViewActions;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static junit.framework.Assert.assertEquals;
 
 /**
  * Created by aditya on 6/28/17.
@@ -23,19 +26,40 @@ import static junit.framework.Assert.assertEquals;
 public class StepDetailBasicTest {
 
     @Rule
-    public ActivityTestRule<MainActivity> mainActivityActivityTestRule
+    public ActivityTestRule<MainActivity> mainActivityTestRule
             = new ActivityTestRule<MainActivity>(MainActivity.class);
 
+    private IdlingResource mIdlingResource;
+
+    @Before
+    public void registerIdlingResource(){
+        mIdlingResource = mainActivityTestRule.getActivity().getIdlingResource();
+
+        Espresso.registerIdlingResources(mIdlingResource);
+    }
+
     @Test
-    public void useAppContext() throws Exception {
-        // Context of the app under test.
-        Context appContext = InstrumentationRegistry.getTargetContext();
-        assertEquals("com.bakingapp", appContext.getPackageName());
+    public void displayContainer(){
+        onView(withId(R.id.container)).check(matches(isDisplayed()));
     }
 
     @Test
     public void displayRecipeIngredients(){
-        onView(withId(R.id.container)).check(matches(isDisplayed()));
+        onView(withId(R.id.rvRecipeMain)).perform(RecyclerViewActions.actionOnItemAtPosition(0,click()));
+        onView(withId(R.id.lvIngredients)).check(matches(isDisplayed()));
+    }
+
+    @Test
+    public void displayRecipeSteps(){
+        onView(withId(R.id.rvRecipeMain)).perform(RecyclerViewActions.actionOnItemAtPosition(0,click()));
+        onView(withId(R.id.rvRecipeSteps)).check(matches(isDisplayed()));
+    }
+
+    @After
+    public void unregisterIdlingResource(){
+        if(mIdlingResource != null){
+            Espresso.unregisterIdlingResources(mIdlingResource);
+        }
     }
 
 }

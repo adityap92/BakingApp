@@ -4,6 +4,10 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
+import android.support.test.espresso.IdlingResource;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -11,6 +15,7 @@ import android.util.Log;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.bakingapp.IdlingResource.BasicIdlingResource;
 import com.bakingapp.data.RecipeIngredients;
 import com.bakingapp.data.RecipeTable;
 
@@ -36,6 +41,17 @@ public class MainActivity extends AppCompatActivity implements RecipeStepsFragme
     public int currRecipeStep;
     final String TAG = MainActivity.class.getSimpleName();
     public RecipesFragment fragRecipe;
+    @Nullable
+    private BasicIdlingResource mIdlingResource;
+
+    @VisibleForTesting
+    @NonNull
+    public IdlingResource getIdlingResource(){
+        if(mIdlingResource == null){
+            mIdlingResource = new BasicIdlingResource();
+        }
+        return mIdlingResource;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +59,9 @@ public class MainActivity extends AppCompatActivity implements RecipeStepsFragme
         setContentView(R.layout.activity_main);
         //library to help with UI binding
         ButterKnife.bind(this);
+
+        getIdlingResource();
+        mIdlingResource.setIdleState(false);
 
         mainContext = getApplicationContext();
 
@@ -166,6 +185,7 @@ public class MainActivity extends AppCompatActivity implements RecipeStepsFragme
                             }
                             addDBentries();
                             openFragment();
+                            mIdlingResource.setIdleState(true);
                         } catch (Exception e) {
                             Log.e(TAG,e.getLocalizedMessage());
                         }
